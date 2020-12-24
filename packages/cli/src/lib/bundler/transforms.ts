@@ -17,6 +17,7 @@
 import webpack, { Module, Plugin } from 'webpack';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { svgrTemplate } from '../svgrTemplate';
+import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
 
 type Transforms = {
   loaders: Module['rules'];
@@ -93,6 +94,7 @@ export const transforms = (options: TransformOptions): Transforms => {
     },
     {
       test: /\.css$/i,
+      exclude: /\.st.css$/,
       use: [
         isDev ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
         {
@@ -103,10 +105,32 @@ export const transforms = (options: TransformOptions): Transforms => {
         },
       ],
     },
+    {
+      test: /\.s[ac]ss$/i,
+      use: [
+        isDev ? require.resolve('style-loader') : MiniCssExtractPlugin.loader,
+        {
+          loader: require.resolve('css-loader'),
+          options: {
+            sourceMap: true,
+          },
+        },
+        require.resolve('sass-loader'),
+      ],
+    },
+    {
+      test: /node_modules\/wix-style-react\/.*?\.(jsx?|mjs)$/,
+      loader: require.resolve('@sucrase/webpack-loader'),
+      options: {
+        transforms: ['jsx', ...extraTransforms],
+        production: !isDev,
+      },
+    },
   ];
 
   const plugins = new Array<Plugin>();
 
+  plugins.push(new StylableWebpackPlugin());
   if (isDev) {
     plugins.push(new webpack.HotModuleReplacementPlugin());
   } else {

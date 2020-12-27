@@ -51,7 +51,7 @@ export async function loadCliConfig(options: Options) {
 
   try {
     const frontendAppConfigs = schema.process(appConfigs, {
-      // visibility: ['frontend'],
+      visibility: ['frontend'],
     });
     const frontendConfig = ConfigReader.fromConfigs(frontendAppConfigs);
 
